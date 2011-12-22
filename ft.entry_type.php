@@ -41,10 +41,10 @@ class Entry_type_ft extends EE_Fieldtype
 			$this->settings['hide_fields'] = array();
 		}
 
-		foreach ($this->settings['hide_fields'] as $name => $field_ids)
+		foreach ($this->settings['hide_fields'] as $field_val => $field)
 		{
-			$fields[$name] = $field_ids;
-			$options[$name] = $name;
+			$fields[$field_val] = $field['fields'];
+			$options[$field_val] = $field['label'];
 		}
 		
 		if ( ! isset($this->EE->session->cache['entry_type']['display_field']))
@@ -222,7 +222,11 @@ class Entry_type_ft extends EE_Fieldtype
 
 		foreach ($data['entry_type_options'] as $i => $option)
 		{
-			$settings['hide_fields'][$option['type']] = (isset($option['hide_fields'])) ? $option['hide_fields'] : array();
+			$option_parts = preg_split('/\s:\s/', $option['type'], 2);
+			$option['label'] = trim($option_parts[0]);
+			$option['value'] = isset($option_parts[1]) ? trim($option_parts[1]) : $option['label'];
+			$settings['hide_fields'][$option['value']]['label'] = $option['label'];
+			$settings['hide_fields'][$option['value']]['fields'] = (isset($option['hide_fields'])) ? $option['hide_fields'] : array();
 		}
 		
 		$settings['blank_hide_fields'] = (isset($data['entry_type_blank_hide_fields'])) ? $data['entry_type_blank_hide_fields'] : array();
@@ -231,6 +235,18 @@ class Entry_type_ft extends EE_Fieldtype
 
 		return $settings;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Option Label
+	 */
+	function replace_label($data)
+	{
+		$label = $this->settings['hide_fields'][$data]['label'];
+		return $label ? $label : '';
+	}
+
 }
 
 /* End of file ft.entry_type.php */
